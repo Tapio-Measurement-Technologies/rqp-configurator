@@ -1,47 +1,108 @@
-# Svelte + TS + Vite
+# RQP Configurator
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+A web-based configuration tool for the Roll Quality Profiler (RQP) system. This application allows users to generate QR codes containing system configuration parameters that can be scanned by RQP devices.
 
-## Recommended IDE Setup
+## Features
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+- **System Configuration**
+  - Set target energy levels
+  - Configure solenoid pulse length
+  - Adjust interpolation and encoder steps
+  - Set accelerometer parameters
+  - Configure PID control modes
 
-## Need an official Svelte framework?
+- **Alert Limits**
+  - Set min/max limits for various measurements
+  - Configure statistical alert thresholds
+  - Adjustable coefficient of variation limits
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+- **QR Code Generation**
+  - Real-time QR code updates
+  - Copy QR code image to clipboard
+  - Download QR code as PNG
+  - Display configuration content in human-readable format
 
-## Technical considerations
+## Getting Started
 
-**Why use this over SvelteKit?**
+### Prerequisites
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+- Node.js (v18 or later recommended)
+- npm or yarn package manager
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+### Installation
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Tapio-Measurement-Technologies/rqp-configurator.git
+   cd rqp-configurator
+   ```
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+3. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-**Why include `.vscode/extensions.json`?**
+4. Open your browser and navigate to `http://localhost:5173`
 
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
+### Building for Production
 
-**Why enable `allowJs` in the TS template?**
+To create a production build:
 
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+```bash
+npm run build
+# or
+yarn build
 ```
+
+The built files will be in the `dist` directory.
+
+## Usage
+
+1. Enter configuration values in the appropriate fields
+2. The QR code updates automatically as you type
+3. Use the "Copy QR" button to copy the QR code image to clipboard
+4. Use the "Download QR" button to save the QR code as a PNG file
+5. The configuration content is displayed below the QR code for verification
+
+## Technical Details
+
+### QR Code Format
+
+The QR code content follows this format:
+- Starts with SOH character (`\x01`)
+- Followed by `CFG:` prefix
+- Configuration pairs in `key=value` format
+- Multiple configurations separated by semicolons
+- Example: `\x01CFG:TARGET_ENERGY=100;SOLENOID_PULSE_LEN_US=500`
+
+### Configuration Types
+
+- **Numeric Values**: Integer or float values with optional min/max limits
+- **Select Options**: Predefined options that map to numeric values
+- **Alert Limits**: Min/max pairs for various measurements
+
+## Development
+
+The project is built with:
+- [Svelte](https://svelte.dev/) + [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vitejs.dev/) for building and development
+- [qrcode](https://www.npmjs.com/package/qrcode) for QR code generation
+
+## License
+
+Copyright © 2024 Tapio Measurement Technologies. All rights reserved.
+
+## Contact
+
+For support or inquiries:
+- Email: info@tapiotechnologies.com
+- Website: [www.tapiotechnologies.com](https://www.tapiotechnologies.com)
