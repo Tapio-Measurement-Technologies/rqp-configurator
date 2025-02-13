@@ -1,14 +1,19 @@
 <footer class="footer">
   <div class="container">
     <div class="footer-content">
-      <div class="footer-branding">
-        <div class="company">
-          <strong>RQP Live</strong>
-          <span class="separator">|</span>
-          <span>Roll Quality Profiler</span>
+      <div class="footer-left">
+        <div class="footer-logo">
+          <img src="/tapio_logo.png" alt="Tapio Measurement Technologies logo" class="logo" />
         </div>
-        <div class="copyright">
-          © {new Date().getFullYear()} Tapio Measurement Technologies. All rights reserved.
+        <div class="footer-branding">
+          <div class="company">
+            <strong>RQP Live</strong>
+            <span class="separator">|</span>
+            <span>Roll Quality Profiler</span>
+          </div>
+          <div class="copyright">
+            © {new Date().getFullYear()} Tapio Measurement Technologies. All rights reserved.
+          </div>
         </div>
       </div>
       <div class="footer-contact">
@@ -43,6 +48,26 @@
     justify-content: space-between;
     align-items: center;
     gap: 2rem;
+  }
+
+  .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .footer-logo {
+    flex-shrink: 0;
+    width: 120px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+  }
+
+  .logo {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
   }
 
   .footer-branding {
@@ -96,6 +121,16 @@
       align-items: center;
       text-align: center;
       gap: 1.5rem;
+    }
+
+    .footer-left {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      width: 100px;
+      height: 35px;
     }
 
     .footer-contact {
