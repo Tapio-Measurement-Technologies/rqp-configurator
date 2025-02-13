@@ -50,6 +50,45 @@ export const SYSTEM_CONFIG = {
       max: 20000
     }
   },
+  ADJUSTMENT_A: {
+    key: 'ADJUSTMENT_A',
+    label: 'Adjustment A',
+    description: 'Quadratic adjustment of measurement values',
+    unit: '',
+    section: SECTIONS.SYSTEM,
+    advanced: true,
+    validation: {
+      type: 'float' as const,
+      min: -1000,
+      max: 1000
+    }
+  },
+  ADJUSTMENT_B: {
+    key: 'ADJUSTMENT_B',
+    label: 'Adjustment B',
+    description: 'Linear adjustment of measurement values',
+    unit: '',
+    section: SECTIONS.SYSTEM,
+    advanced: true,
+    validation: {
+      type: 'float' as const,
+      min: -1000,
+      max: 1000
+    }
+  },
+  ADJUSTMENT_C: {
+    key: 'ADJUSTMENT_C',
+    label: 'Adjustment C',
+    description: 'Constant adjustment of measurement values',
+    unit: '',
+    section: SECTIONS.SYSTEM,
+    advanced: true,
+    validation: {
+      type: 'float' as const,
+      min: -1000,
+      max: 1000
+    }
+  },
   INTERP_STEP_MM: {
     key: 'INTERP_STEP_MM',
     label: 'Interpolation Step',
