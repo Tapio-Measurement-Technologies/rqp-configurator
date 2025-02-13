@@ -1,9 +1,14 @@
+<script lang="ts">
+  const basePath = import.meta.env.BASE_URL
+  const logoPath = `${basePath}tapio_logo.png`
+</script>
+
 <footer class="footer">
   <div class="container">
     <div class="footer-content">
       <div class="footer-left">
         <div class="footer-logo">
-          <img src="/tapio_logo.png" alt="Tapio Measurement Technologies logo" class="logo" />
+          <img src={logoPath} alt="Tapio Measurement Technologies logo" class="logo" />
         </div>
         <div class="footer-branding">
           <div class="company">
