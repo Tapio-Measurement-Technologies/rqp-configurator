@@ -34,7 +34,7 @@ export const SYSTEM_CONFIG = {
     validation: {
       type: 'float' as const,
       min: 0,
-      max: 20000
+      max: 50000
     }
   },
   SOLENOID_PULSE_LEN_US: {
@@ -47,7 +47,7 @@ export const SYSTEM_CONFIG = {
     validation: {
       type: 'float' as const,
       min: 0,
-      max: 20000
+      max: 15000
     }
   },
   ADJUSTMENT_A: {
@@ -99,7 +99,7 @@ export const SYSTEM_CONFIG = {
     validation: {
       type: 'float' as const,
       min: 0,
-      max: 20000
+      max: 10
     }
   },
   DISTANCE_ENCODER_STEP_MM: {
@@ -112,7 +112,7 @@ export const SYSTEM_CONFIG = {
     validation: {
       type: 'float' as const,
       min: 0,
-      max: 20000
+      max: 10
     }
   },
   ACCELEROMETER_RANGE_PM: {
@@ -124,8 +124,8 @@ export const SYSTEM_CONFIG = {
     advanced: true,
     validation: {
       type: 'float' as const,
-      min: 0,
-      max: 20000
+      min: -1000,
+      max: 1000
     }
   },
   PID_MODE: {
