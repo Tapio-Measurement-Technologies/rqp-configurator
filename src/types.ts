@@ -22,6 +22,7 @@ interface BaseConfigItem {
   unit?: string;
   section: SectionType;
   validation: ConfigValidation | SelectValidation;
+  advanced?: boolean;
 }
 
 export interface ConfigItem extends BaseConfigItem {
@@ -71,16 +72,6 @@ function groupItemsBySection(items: (ConfigItem | AlertLimitItem)[]): ConfigSect
 
   const result: ConfigSection[] = []
 
-  // Add system section if it has items
-  const systemItems = sections.get(SECTIONS.SYSTEM)
-  if (systemItems) {
-    result.push({
-      id: SECTIONS.SYSTEM,
-      title: 'System Configuration',
-      items: systemItems as ConfigItem[]
-    })
-  }
-
   // Add alerts section if it has items
   const alertItems = sections.get(SECTIONS.ALERTS)
   if (alertItems) {
@@ -89,6 +80,16 @@ function groupItemsBySection(items: (ConfigItem | AlertLimitItem)[]): ConfigSect
       title: 'Alert Limits',
       type: 'alert_limits',
       items: alertItems as AlertLimitItem[]
+    })
+  }
+
+  // Add system section if it has items
+  const systemItems = sections.get(SECTIONS.SYSTEM)
+  if (systemItems) {
+    result.push({
+      id: SECTIONS.SYSTEM,
+      title: 'System Configuration',
+      items: systemItems as ConfigItem[]
     })
   }
 

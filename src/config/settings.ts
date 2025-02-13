@@ -9,7 +9,8 @@ export const SECTIONS = {
 export type SectionType = typeof SECTIONS[keyof typeof SECTIONS]
 
 export const UI_CONFIG = {
-  SHOW_CONFIG_KEYS: false
+  SHOW_CONFIG_KEYS: false,
+  ADVANCED_WARNING: 'Warning: Advanced settings affect core device functionality. Incorrect values may cause the device to malfunction.'
 } as const
 
 export const QR_CONFIG = {
@@ -29,6 +30,7 @@ export const SYSTEM_CONFIG = {
     description: 'Target energy level for the system',
     unit: 'J',
     section: SECTIONS.SYSTEM,
+    advanced: true,
     validation: {
       type: 'float' as const,
       min: 0,
@@ -41,6 +43,7 @@ export const SYSTEM_CONFIG = {
     description: 'Duration of the solenoid pulse',
     unit: 'µs',
     section: SECTIONS.SYSTEM,
+    advanced: true,
     validation: {
       type: 'float' as const,
       min: 0,
@@ -53,6 +56,7 @@ export const SYSTEM_CONFIG = {
     description: 'Step size for interpolation',
     unit: 'mm',
     section: SECTIONS.SYSTEM,
+    advanced: true,
     validation: {
       type: 'float' as const,
       min: 0,
@@ -65,6 +69,7 @@ export const SYSTEM_CONFIG = {
     description: 'Step size for distance encoder',
     unit: 'mm',
     section: SECTIONS.SYSTEM,
+    advanced: true,
     validation: {
       type: 'float' as const,
       min: 0,
@@ -77,6 +82,7 @@ export const SYSTEM_CONFIG = {
     description: 'Range of the accelerometer',
     unit: '',
     section: SECTIONS.SYSTEM,
+    advanced: true,
     validation: {
       type: 'float' as const,
       min: 0,
@@ -89,6 +95,7 @@ export const SYSTEM_CONFIG = {
     description: 'Hammer speed control mode',
     unit: '',
     section: SECTIONS.SYSTEM,
+    advanced: true,
     validation: {
       type: 'select' as const,
       options: [

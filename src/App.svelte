@@ -3,13 +3,14 @@
   import type { ConfigItem, AlertLimitItem, ConfigSection as ConfigSectionType } from './types'
   import ConfigSection from './lib/ConfigSection.svelte'
   import QRDisplay from './lib/QRDisplay.svelte'
-  import { QR_CONFIG } from './config/settings'
-    import Footer from './lib/Footer.svelte';
-    import Header from './lib/Header.svelte';
+  import { QR_CONFIG, UI_CONFIG } from './config/settings'
+  import Footer from './lib/Footer.svelte';
+  import Header from './lib/Header.svelte';
 
   let configSections = defaultConfigs
   let text = ''
   let showWarning = false
+  let showAdvanced = false
 
   function updateConfigText() {
     const configPairs = configSections
@@ -46,10 +47,59 @@
     })
   }
 
-  $: configValues = configSections.flatMap(section => section.items.map(item =>
-    'value' in item ? item.value : [item.minValue, item.maxValue]
-  ).flat())
-  $: if (configValues) {
+  function resetAdvancedValues() {
+    configSections = configSections.map(section => {
+      if (section.type === 'alert_limits') {
+        return {
+          ...section,
+          items: (section.items as AlertLimitItem[]).map(item =>
+            item.advanced ? { ...item, minValue: '', maxValue: '' } : item
+          )
+        }
+      }
+      return {
+        ...section,
+        items: (section.items as ConfigItem[]).map(item =>
+          item.advanced ? { ...item, value: '' } : item
+        )
+      }
+    }) as ConfigSectionType[]
+  }
+
+  $: visibleSections = configSections.map(section => {
+    const filteredItems = section.type === 'alert_limits'
+      ? (section.items as AlertLimitItem[]).filter(item => showAdvanced || !item.advanced)
+      : (section.items as ConfigItem[]).filter(item => showAdvanced || !item.advanced)
+
+    return {
+      ...section,
+      items: filteredItems
+    }
+  }).filter(section => section.items.length > 0)
+
+  $: {
+    if (!showAdvanced) {
+      resetAdvancedValues()
+    } else {
+      visibleSections.forEach(visibleSection => {
+        const originalSection = configSections.find(s => s.id === visibleSection.id)
+        if (originalSection) {
+          visibleSection.items.forEach(item => {
+            const originalItem = originalSection.items.find(i =>
+              'key' in item && 'key' in i && item.key === i.key
+            )
+            if (originalItem) {
+              if ('value' in item && 'value' in originalItem) {
+                originalItem.value = item.value
+              } else if ('minValue' in item && 'minValue' in originalItem) {
+                originalItem.minValue = item.minValue
+                originalItem.maxValue = item.maxValue
+              }
+            }
+          })
+        }
+      })
+    }
     updateConfigText()
   }
 </script>
@@ -59,11 +109,34 @@
     <Header />
 
     <div class="card">
+      <div class="settings-toggle">
+        <label class="toggle">
+          <input
+            type="checkbox"
+            bind:checked={showAdvanced}
+          />
+          <span class="slider"></span>
+          <span class="label">Show Advanced Settings</span>
+        </label>
+      </div>
+
+      {#if showAdvanced}
+        <div class="advanced-warning">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <span>{UI_CONFIG.ADVANCED_WARNING}</span>
+        </div>
+      {/if}
+
       {#if showWarning}
         <div class="warning-message">
           Warning: Only the first {QR_CONFIG.MAX_CONFIG_VALUES} configuration values will be included in the QR code.
         </div>
       {/if}
+
       <div class="content-grid">
         <div class="input-section">
           <div class="section-header">
@@ -73,7 +146,7 @@
             </button>
           </div>
           <div class="config-list">
-            {#each configSections as section (section.id)}
+            {#each visibleSections as section (section.id)}
               <ConfigSection bind:section />
             {/each}
           </div>
@@ -106,7 +179,7 @@
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
-    padding: 0 1rem;
+    padding: 2rem 1rem;
     flex: 1;
   }
 
@@ -135,29 +208,71 @@
     gap: 2rem;
   }
 
-  @media (max-width: 768px) {
-    .content-grid {
-      grid-template-columns: 1fr;
-      gap: 2rem;
-    }
-
-    .input-section {
-      padding-right: 0;
-      border-right: none;
-      border-bottom: 1px solid #e2e8f0;
-      padding-bottom: 2rem;
-    }
+  .settings-toggle {
+    margin-bottom: 1rem;
   }
 
-  @media (max-width: 640px) {
-    h1 {
-      font-size: 2rem;
-    }
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+  }
 
-    .card {
-      padding: 1.5rem;
-      border-radius: 12px;
-    }
+  .toggle input {
+    display: none;
+  }
+
+  .slider {
+    position: relative;
+    width: 48px;
+    height: 24px;
+    background-color: #e2e8f0;
+    border-radius: 24px;
+    transition: all 0.2s ease;
+  }
+
+  .slider:before {
+    content: "";
+    position: absolute;
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+  }
+
+  input:checked + .slider {
+    background-color: #3b82f6;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+
+  .label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #1a1a1a;
+  }
+
+  .advanced-warning {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 8px;
+    color: #856404;
+  }
+
+  .advanced-warning svg {
+    flex-shrink: 0;
+    color: #856404;
   }
 
   .warning-message {
@@ -210,5 +325,34 @@
   .clear-button:focus {
     outline: none;
     box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .input-section {
+      padding-right: 0;
+      border-right: none;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 2rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .card {
+      padding: 1.5rem;
+      border-radius: 12px;
+    }
+
+    .container {
+      padding: 1rem;
+    }
   }
 </style>
