@@ -65,6 +65,10 @@
     link.click()
   }
 
+  function isQREmpty(): boolean {
+    return !text || !text.trim();
+  }
+
   $: if (text !== undefined) {
     generateQR()
   }
@@ -89,22 +93,45 @@
     {/if}
     <canvas bind:this={qrCanvas} class:hidden={!text}></canvas>
   </div>
+  <div class="button-group">
+    <button
+      type="button"
+      class="action-button download-button"
+      on:click={downloadQR}
+      disabled={isQREmpty()}
+      title={isQREmpty() ? 'Generate a QR code first' : 'Download QR code as image'}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      <span>Download image</span>
+    </button>
+    <button
+      type="button"
+      class="action-button copy-button"
+      on:click={copyToClipboard}
+      disabled={isQREmpty()}
+      title={isQREmpty() ? 'Generate a QR code first' : 'Copy QR code to clipboard'}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+      <span>
+        {#if copyMessage}
+          {copyMessage}
+        {:else}
+          Copy to clipboard
+        {/if}
+      </span>
+    </button>
+  </div>
   {#if text}
     <div class="content-section">
       <div class="content-header">
-        <p class="qr-text">Content:</p>
-        <div class="button-group">
-          <button type="button" class="action-button copy-button" on:click={copyToClipboard}>
-            {#if copyMessage}
-              {copyMessage}
-            {:else}
-              Copy QR
-            {/if}
-          </button>
-          <button type="button" class="action-button download-button" on:click={downloadQR}>
-            Download QR
-          </button>
-        </div>
+        <p class="qr-text">Raw data:</p>
       </div>
       <pre class="code-block">{formatContentWithHex(text)}</pre>
     </div>
@@ -203,48 +230,53 @@
   }
 
   .button-group {
-    display: flex;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 0;
+    min-width: 368px;
   }
 
   .action-button {
-    padding: 0.4rem 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 8px;
+    background-color: white;
+    color: var(--text-color, #1a1a1a);
     font-size: 0.9rem;
-    background-color: transparent;
-    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
-    min-width: 60px;
-    text-align: center;
   }
 
-  .copy-button {
-    color: #3b82f6;
-    border: 1px solid #3b82f6;
+  .action-button:hover {
+    background-color: var(--button-background, #f9f9f9);
+    border-color: var(--link-color, #646cff);
   }
 
-  .copy-button:hover {
-    background-color: #3b82f6;
-    color: white;
+  .action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: var(--border-color, #e2e8f0);
+    background-color: var(--button-background, #f9f9f9);
   }
 
-  .copy-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  .action-button:disabled:hover {
+    border-color: var(--border-color, #e2e8f0);
+    background-color: var(--button-background, #f9f9f9);
   }
 
-  .download-button {
-    color: #10b981;
-    border: 1px solid #10b981;
+  .action-button svg {
+    flex-shrink: 0;
   }
 
-  .download-button:hover {
-    background-color: #10b981;
-    color: white;
-  }
-
-  .download-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  @media (max-width: 640px) {
+    .button-group {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
