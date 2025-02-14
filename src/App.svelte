@@ -182,11 +182,6 @@
     color: #856404;
   }
 
-  .advanced-warning svg {
-    flex-shrink: 0;
-    color: #856404;
-  }
-
   .warning-message {
     background-color: #fff3cd;
     color: #856404;
@@ -254,10 +249,6 @@
   }
 
   @media (max-width: 640px) {
-    h1 {
-      font-size: 2rem;
-    }
-
     .card {
       padding: 1.5rem;
       border-radius: 12px;

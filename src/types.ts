@@ -1,4 +1,14 @@
-import { SECTIONS } from './config/settings'
+export type ConfigValueType = 'integer' | 'float' | 'select' | 'toggle'
+
+export interface BaseConfigItem {
+  key: string;
+  label: string;
+  description: string;
+  unit: string;
+  validation: ConfigValidation | SelectValidation | ToggleValidation;
+  advanced?: boolean;
+  defaultValue?: string;
+}
 
 export interface ConfigValidation {
   type: 'integer' | 'float';
@@ -15,16 +25,6 @@ export interface ToggleValidation {
   type: 'toggle';
   offLabel?: string;
   onLabel?: string;
-}
-
-interface BaseConfigItem {
-  key: string;
-  label: string;
-  description: string;
-  unit?: string;
-  validation: ConfigValidation | SelectValidation | ToggleValidation;
-  advanced?: boolean;
-  defaultValue?: string;
 }
 
 export interface ConfigItem extends BaseConfigItem {
@@ -49,31 +49,10 @@ export interface ConfigSection {
   defaultExpanded?: boolean;
 }
 
-function createConfigItems(items: Record<string, BaseConfigItem>): ConfigItem[] {
-  return Object.values(items).map(item => ({
-    ...item,
-    value: item.defaultValue ?? ''
-  }))
+export interface SectionConfig {
+  id: string;
+  title: string;
+  type?: 'alert_limits';
+  defaultExpanded?: boolean;
+  items: Record<string, BaseConfigItem>;
 }
-
-function createAlertItems(items: Record<string, BaseConfigItem>): AlertLimitItem[] {
-  return Object.values(items).map(item => ({
-    ...item,
-    minValue: '',
-    maxValue: ''
-  }))
-}
-
-function groupItemsBySection(): ConfigSection[] {
-  return Object.entries(SECTIONS).map(([_, section]) => ({
-    id: section.id,
-    title: section.title,
-    type: section.type,
-    defaultExpanded: section.defaultExpanded,
-    items: section.type === 'alert_limits'
-      ? createAlertItems(section.items)
-      : createConfigItems(section.items)
-  }))
-}
-
-export const defaultConfigs: ConfigSection[] = groupItemsBySection()

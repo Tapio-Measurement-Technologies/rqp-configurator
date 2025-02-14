@@ -164,12 +164,6 @@
     color: #94a3b8;
   }
 
-  .placeholder svg {
-    width: 48px;
-    height: 48px;
-    stroke: currentColor;
-  }
-
   .placeholder span {
     font-size: 0.95rem;
   }
@@ -259,10 +253,6 @@
   .action-button:disabled:hover {
     border-color: var(--border-color, #e2e8f0);
     background-color: var(--button-background, #f9f9f9);
-  }
-
-  .action-button svg {
-    flex-shrink: 0;
   }
 
   @media (max-width: 640px) {

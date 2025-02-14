@@ -1,13 +1,39 @@
 import { writable, derived } from 'svelte/store'
 import type { ConfigItem, AlertLimitItem, ConfigSection } from '../types'
-import { defaultConfigs } from '../types'
+import { defaultConfigs } from '../utils/configUtils'
+import { UI_CONFIG } from '../config/settings'
+
+const STORAGE_KEY = 'rqp-configurator-state'
+
+// Load initial state from localStorage or use default
+const loadInitialState = () => {
+  if (typeof window === 'undefined' || !UI_CONFIG.PERSIST_STATE) return defaultConfigs
+
+  const savedState = window.localStorage.getItem(STORAGE_KEY)
+  if (!savedState) return defaultConfigs
+
+  try {
+    const parsedState = JSON.parse(savedState)
+    return parsedState
+  } catch (error) {
+    console.error('Error loading saved state:', error)
+    return defaultConfigs
+  }
+}
 
 function createConfigStore() {
-  const { subscribe, set, update } = writable(defaultConfigs)
+  const { subscribe, set, update } = writable<ConfigSection[]>(loadInitialState())
+
+  // Save to localStorage whenever the store changes
+  subscribe(state => {
+    if (typeof window !== 'undefined' && UI_CONFIG.PERSIST_STATE) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    }
+  })
 
   return {
     subscribe,
-    clearAllValues: () => update(sections =>
+    clearAllValues: () => update((sections: ConfigSection[]) =>
       sections.map(section => {
         if (section.type === 'alert_limits') {
           return {
@@ -21,7 +47,7 @@ function createConfigStore() {
         }
       })
     ),
-    resetAdvancedValues: () => update(sections =>
+    resetAdvancedValues: () => update((sections: ConfigSection[]) =>
       sections.map(section => {
         if (section.type === 'alert_limits') {
           return {
@@ -39,12 +65,12 @@ function createConfigStore() {
         }
       }) as ConfigSection[]
     ),
-    updateVisibleSectionValues: (visibleSections: ConfigSection[]) => update(sections => {
+    updateVisibleSectionValues: (visibleSections: ConfigSection[]) => update((sections: ConfigSection[]) => {
       visibleSections.forEach(visibleSection => {
-        const originalSection = sections.find(s => s.id === visibleSection.id)
+        const originalSection = sections.find((s: ConfigSection) => s.id === visibleSection.id)
         if (originalSection) {
           visibleSection.items.forEach(item => {
-            const originalItem = originalSection.items.find(i =>
+            const originalItem = originalSection.items.find((i: ConfigItem | AlertLimitItem) =>
               'key' in item && 'key' in i && item.key === i.key
             )
             if (originalItem) {
@@ -59,14 +85,32 @@ function createConfigStore() {
         }
       })
       return sections
-    })
+    }),
+    resetToDefault: () => {
+      if (typeof window !== 'undefined' && UI_CONFIG.PERSIST_STATE) {
+        window.localStorage.removeItem(STORAGE_KEY)
+      }
+      set(defaultConfigs)
+    }
   }
 }
 
 export const configStore = createConfigStore()
 
-// Create a store for the showAdvanced state
-export const showAdvancedStore = writable(false)
+// Create a store for the showAdvanced state with localStorage persistence
+const loadShowAdvanced = () => {
+  if (typeof window === 'undefined' || !UI_CONFIG.PERSIST_STATE) return false
+  return window.localStorage.getItem('showAdvanced') === 'true'
+}
+
+export const showAdvancedStore = writable(loadShowAdvanced())
+
+// Save showAdvanced state to localStorage
+showAdvancedStore.subscribe(value => {
+  if (typeof window !== 'undefined' && UI_CONFIG.PERSIST_STATE) {
+    window.localStorage.setItem('showAdvanced', value.toString())
+  }
+})
 
 // Create a derived store that depends on both configStore and showAdvancedStore
 export const visibleSections = derived(
