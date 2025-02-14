@@ -11,7 +11,8 @@ export type SectionType = typeof SECTIONS[keyof typeof SECTIONS]
 
 export const UI_CONFIG = {
   SHOW_CONFIG_KEYS: false,
-  ADVANCED_WARNING: 'Warning: Advanced settings affect core device functionality. Incorrect values may cause the device to malfunction.'
+  ADVANCED_WARNING: 'Warning: Advanced settings affect core device functionality. Incorrect values may cause the device to malfunction.',
+  TIME_SYNC_UPDATE_INTERVAL: 1000 // Update timestamp every second
 } as const
 
 export const QR_CONFIG = {

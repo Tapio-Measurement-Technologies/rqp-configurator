@@ -6,11 +6,30 @@
   import { QR_CONFIG, UI_CONFIG } from './config/settings'
   import Footer from './lib/Footer.svelte';
   import Header from './lib/Header.svelte';
+  import { onMount } from 'svelte';
 
   let configSections = defaultConfigs
   let text = ''
   let showWarning = false
   let showAdvanced = false
+  let syncTime = true
+  let currentTimestamp = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 1000)
+
+  // Update timestamp periodically
+  let timestampInterval: NodeJS.Timeout
+
+  onMount(() => {
+    timestampInterval = setInterval(() => {
+      if (syncTime) {
+        currentTimestamp = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 1000)
+        updateConfigText()
+      }
+    }, UI_CONFIG.TIME_SYNC_UPDATE_INTERVAL)
+
+    return () => {
+      clearInterval(timestampInterval)
+    }
+  })
 
   function updateConfigText() {
     const configPairs = configSections
@@ -26,6 +45,11 @@
           ...(item.maxValue.trim() ? [`${maxKey}=${item.maxValue}`] : [])
         ]
       })
+
+    // Add time sync if enabled
+    if (syncTime) {
+      configPairs.push(`SETTIME=${currentTimestamp}`)
+    }
 
     const validConfigs = configPairs.slice(0, QR_CONFIG.MAX_CONFIG_VALUES).join(';')
     text = validConfigs
@@ -109,7 +133,17 @@
     <Header />
 
     <div class="card">
-      <div class="settings-toggle">
+      <div class="settings-toggles">
+        <label class="toggle">
+          <input
+            type="checkbox"
+            bind:checked={syncTime}
+            on:change={updateConfigText}
+          />
+          <span class="slider"></span>
+          <span class="label">Sync device time</span>
+        </label>
+
         <label class="toggle">
           <input
             type="checkbox"
@@ -208,7 +242,10 @@
     gap: 2rem;
   }
 
-  .settings-toggle {
+  .settings-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
     margin-bottom: 1rem;
   }
 
