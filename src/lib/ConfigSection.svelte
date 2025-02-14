@@ -5,6 +5,7 @@
   import AlertLimitItem from './AlertLimitItem.svelte'
   import SelectConfigItem from './SelectConfigItem.svelte'
   import ToggleConfigItem from './ToggleConfigItem.svelte'
+  import ArrowIcon from '../assets/icons/arrow.svg?raw'
 
   export let section: ConfigSection
   let isExpanded = section.defaultExpanded ?? false
@@ -39,20 +40,9 @@
   >
     <div class="header-content">
       <h2>{section.title}</h2>
-      <svg
-        class="arrow"
-        class:expanded={isExpanded}
-        width="20"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M6.175 7.158L10 10.975L13.825 7.158L15 8.333L10 13.333L5 8.333L6.175 7.158Z"
-          fill="currentColor"
-        />
-      </svg>
+      <div class="arrow" class:expanded={isExpanded}>
+        {@html ArrowIcon}
+      </div>
     </div>
   </button>
 
