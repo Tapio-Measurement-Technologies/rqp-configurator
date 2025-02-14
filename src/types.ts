@@ -1,4 +1,4 @@
-import { SYSTEM_CONFIG, ALERT_LIMITS, SECTIONS } from './config/settings'
+import { SYSTEM_CONFIG, ALERT_LIMITS, BASIC_CONFIG, SECTIONS } from './config/settings'
 import type { ConfigValueType, SectionType } from './config/settings'
 
 export interface ConfigValidation {
@@ -9,10 +9,13 @@ export interface ConfigValidation {
 
 export interface SelectValidation {
   type: 'select';
-  options: Array<{
-    label: string;
-    value: number;
-  }>;
+  options: { label: string; value: number | string }[];
+}
+
+export interface ToggleValidation {
+  type: 'toggle';
+  offLabel?: string;
+  onLabel?: string;
 }
 
 interface BaseConfigItem {
@@ -21,7 +24,7 @@ interface BaseConfigItem {
   description: string;
   unit?: string;
   section: SectionType;
-  validation: ConfigValidation | SelectValidation;
+  validation: ConfigValidation | SelectValidation | ToggleValidation;
   advanced?: boolean;
 }
 
@@ -71,6 +74,16 @@ function groupItemsBySection(items: (ConfigItem | AlertLimitItem)[]): ConfigSect
   })
 
   const result: ConfigSection[] = []
+
+  // Add basic section if it has items
+  const basicItems = sections.get(SECTIONS.BASIC)
+  if (basicItems) {
+    result.push({
+      id: SECTIONS.BASIC,
+      title: 'Basic Settings',
+      items: basicItems as ConfigItem[]
+    })
+  }
 
   // Add alerts section if it has items
   const alertItems = sections.get(SECTIONS.ALERTS)
@@ -122,6 +135,7 @@ function groupItemsBySection(items: (ConfigItem | AlertLimitItem)[]): ConfigSect
 
 // Combine all config items
 const allConfigItems = [
+  ...createConfigItems(BASIC_CONFIG),
   ...createConfigItems(SYSTEM_CONFIG),
   ...createAlertItems(ALERT_LIMITS)
 ]

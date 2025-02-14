@@ -4,6 +4,7 @@
   import ConfigItem from './ConfigItem.svelte'
   import AlertLimitItem from './AlertLimitItem.svelte'
   import SelectConfigItem from './SelectConfigItem.svelte'
+  import ToggleConfigItem from './ToggleConfigItem.svelte'
 
   export let section: ConfigSection
   let isExpanded = false
@@ -14,6 +15,10 @@
 
   function isSelectItem(item: any): item is SelectConfigItemType {
     return item.validation?.type === 'select'
+  }
+
+  function isToggleItem(item: any): boolean {
+    return item.validation?.type === 'toggle'
   }
 
   function isAlertLimitItem(item: any): item is AlertLimitItemType {
@@ -65,6 +70,8 @@
         {#each section.items as item}
           {#if isSelectItem(item)}
             <SelectConfigItem bind:item={item as SelectConfigItemType} />
+          {:else if isToggleItem(item)}
+            <ToggleConfigItem bind:item={item as ConfigItemType} />
           {:else if !isAlertLimitItem(item)}
             <ConfigItem bind:item={item as ConfigItemType} />
           {/if}

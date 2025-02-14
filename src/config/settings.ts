@@ -1,8 +1,9 @@
-export type ConfigValueType = 'integer' | 'float' | 'select'
+export type ConfigValueType = 'integer' | 'float' | 'select' | 'toggle'
 
 export const SECTIONS = {
   SYSTEM: 'system',
   ALERTS: 'alerts',
+  BASIC: 'basic',
   UNASSIGNED: 'unassigned'
 } as const
 
@@ -20,6 +21,63 @@ export const QR_CONFIG = {
   QR_OPTIONS: {
     width: 300,
     margin: 2
+  }
+} as const
+
+export const BASIC_CONFIG = {
+  LOCALE: {
+    key: 'locale',
+    label: 'Language',
+    description: 'Interface language',
+    unit: '',
+    section: SECTIONS.BASIC,
+    validation: {
+      type: 'select' as const,
+      options: [
+        { label: 'English', value: 'en' },
+        { label: 'Suomi', value: 'fi' },
+        { label: '日本語', value: 'ja' },
+        { label: '简体中文', value: 'zh-cn' }
+      ]
+    }
+  },
+  ROTATION: {
+    key: 'rotation',
+    label: 'Screen Rotation',
+    description: 'Set the display orientation',
+    unit: '',
+    section: SECTIONS.BASIC,
+    validation: {
+      type: 'select' as const,
+      options: [
+        { label: 'Normal', value: 1 },
+        { label: 'Flipped', value: 3 }
+      ]
+    }
+  },
+  IDLE_SHUTDOWN_TIMEOUT: {
+    key: 'idle_shutdown_timeout',
+    label: 'Auto Shutdown',
+    description: 'Time in minutes before automatic shutdown when idle',
+    unit: 'min',
+    section: SECTIONS.BASIC,
+    validation: {
+      type: 'integer' as const,
+      min: 0,
+      max: 1440
+    }
+  },
+  REMOVE_FILES_AFTER_SYNC: {
+    key: 'remove_files_after_sync',
+    label: 'Auto Clean Files',
+    description: 'Automatically remove measurement files after successful sync',
+    unit: '',
+    section: SECTIONS.BASIC,
+    validation: {
+      type: 'toggle' as const,
+      offLabel: 'Keep',
+      onLabel: 'Remove'
+    }
   }
 } as const
 
