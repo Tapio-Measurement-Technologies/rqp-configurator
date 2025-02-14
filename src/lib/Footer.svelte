@@ -17,7 +17,7 @@
             <span>Roll Quality Profiler</span>
           </div>
           <div class="copyright">
-            © {new Date().getFullYear()} Tapio Measurement Technologies. All rights reserved.
+            Tapio Measurement Technologies Oy
           </div>
         </div>
       </div>
