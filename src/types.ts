@@ -24,6 +24,7 @@ interface BaseConfigItem {
   unit?: string;
   validation: ConfigValidation | SelectValidation | ToggleValidation;
   advanced?: boolean;
+  defaultValue?: string;
 }
 
 export interface ConfigItem extends BaseConfigItem {
@@ -51,7 +52,7 @@ export interface ConfigSection {
 function createConfigItems(items: Record<string, BaseConfigItem>): ConfigItem[] {
   return Object.values(items).map(item => ({
     ...item,
-    value: ''
+    value: item.defaultValue ?? ''
   }))
 }
 

@@ -12,16 +12,36 @@
   let text = ''
   let showWarning = false
   let showAdvanced = false
-  let syncTime = true
   let currentTimestamp = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 1000)
+
+  function getTimezoneOffset(timezone: string): number {
+    if (timezone === 'local') {
+      return new Date().getTimezoneOffset() * 60000
+    }
+    if (timezone === 'UTC') {
+      return 0
+    }
+    const match = timezone.match(/UTC([+-])(\d+)/)
+    if (match) {
+      const [, sign, hours] = match
+      return (sign === '-' ? 1 : -1) * parseInt(hours) * 3600000
+    }
+    return 0
+  }
 
   // Update timestamp periodically
   let timestampInterval: NodeJS.Timeout
 
   onMount(() => {
     timestampInterval = setInterval(() => {
-      if (syncTime) {
-        currentTimestamp = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 1000)
+      const dateTimeSection = configSections.find(s => s.id === 'date_time')
+      const timeSyncItem = dateTimeSection?.items.find(item => item.key === 'SETTIME')
+      const timezoneItem = dateTimeSection?.items.find(item => item.key === 'timezone')
+
+      if (timeSyncItem && 'value' in timeSyncItem && timeSyncItem.value === '1') {
+        const timezone = timezoneItem && 'value' in timezoneItem ? timezoneItem.value : 'local'
+        const offset = getTimezoneOffset(timezone)
+        currentTimestamp = Math.floor((Date.now() - offset) / 1000)
         updateConfigText()
       }
     }, UI_CONFIG.TIME_SYNC_UPDATE_INTERVAL)
@@ -36,6 +56,12 @@
       .flatMap(section => section.items as (ConfigItem | AlertLimitItem)[])
       .flatMap((item: ConfigItem | AlertLimitItem) => {
         if ('value' in item) {
+          if (item.key === 'SETTIME') {
+            return item.value === '1' ? [`${item.key}=${currentTimestamp}`] : []
+          }
+          if (item.key === 'timezone') {
+            return []
+          }
           return item.value.trim() ? [`${item.key}=${item.value}`] : []
         }
         const minKey = `${item.key}_min`
@@ -45,11 +71,6 @@
           ...(item.maxValue.trim() ? [`${maxKey}=${item.maxValue}`] : [])
         ]
       })
-
-    // Add time sync if enabled
-    if (syncTime) {
-      configPairs.push(`SETTIME=${currentTimestamp}`)
-    }
 
     const validConfigs = configPairs.slice(0, QR_CONFIG.MAX_CONFIG_VALUES).join(';')
     text = validConfigs
@@ -134,16 +155,6 @@
 
     <div class="card">
       <div class="settings-toggles">
-        <label class="toggle">
-          <input
-            type="checkbox"
-            bind:checked={syncTime}
-            on:change={updateConfigText}
-          />
-          <span class="slider"></span>
-          <span class="label">Sync device time</span>
-        </label>
-
         <label class="toggle">
           <input
             type="checkbox"

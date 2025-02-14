@@ -7,6 +7,7 @@ interface BaseConfigItem {
   unit: string;
   validation: ConfigValidation | SelectValidation | ToggleValidation;
   advanced?: boolean;
+  defaultValue?: string;
 }
 
 interface ConfigValidation {
@@ -35,6 +36,63 @@ interface SectionConfig {
 }
 
 export const SECTIONS: Record<string, SectionConfig> = {
+  DATE_TIME: {
+    id: 'date_time',
+    title: 'Date and Time',
+    defaultExpanded: true,
+    items: {
+      TIME_SYNC: {
+        key: 'SETTIME',
+        label: 'Time Synchronization',
+        description: 'Automatically synchronize device time with local time',
+        unit: '',
+        defaultValue: '1',
+        validation: {
+          type: 'toggle' as const,
+          offLabel: 'Off',
+          onLabel: 'On'
+        }
+      },
+      TIMEZONE: {
+        key: 'timezone',
+        label: 'Timezone',
+        description: 'Select timezone for time synchronization',
+        unit: '',
+        defaultValue: 'local',
+        validation: {
+          type: 'select' as const,
+          options: [
+            { label: 'Local Time', value: 'local' },
+            { label: 'UTC (London, Lisbon)', value: 'UTC' },
+            { label: 'UTC+1 (Berlin, Paris, Rome)', value: 'UTC+1' },
+            { label: 'UTC+2 (Helsinki, Cairo, Jerusalem)', value: 'UTC+2' },
+            { label: 'UTC+3 (Moscow, Istanbul, Riyadh)', value: 'UTC+3' },
+            { label: 'UTC+4 (Dubai, Baku)', value: 'UTC+4' },
+            { label: 'UTC+5 (Karachi, Tashkent)', value: 'UTC+5' },
+            { label: 'UTC+6 (Dhaka, Almaty)', value: 'UTC+6' },
+            { label: 'UTC+7 (Bangkok, Jakarta)', value: 'UTC+7' },
+            { label: 'UTC+8 (Singapore, Beijing, Manila)', value: 'UTC+8' },
+            { label: 'UTC+9 (Tokyo, Seoul)', value: 'UTC+9' },
+            { label: 'UTC+10 (Sydney, Brisbane)', value: 'UTC+10' },
+            { label: 'UTC+11 (Solomon Islands)', value: 'UTC+11' },
+            { label: 'UTC+12 (Auckland, Fiji)', value: 'UTC+12' },
+            { label: 'UTC-1 (Azores)', value: 'UTC-1' },
+            { label: 'UTC-2 (South Georgia)', value: 'UTC-2' },
+            { label: 'UTC-3 (São Paulo, Buenos Aires)', value: 'UTC-3' },
+            { label: 'UTC-4 (New York, Toronto)', value: 'UTC-4' },
+            { label: 'UTC-5 (Chicago, Mexico City)', value: 'UTC-5' },
+            { label: 'UTC-6 (Denver, Calgary)', value: 'UTC-6' },
+            { label: 'UTC-7 (Los Angeles, Phoenix)', value: 'UTC-7' },
+            { label: 'UTC-8 (Anchorage)', value: 'UTC-8' },
+            { label: 'UTC-9 (Alaska)', value: 'UTC-9' },
+            { label: 'UTC-10 (Hawaii)', value: 'UTC-10' },
+            { label: 'UTC-11 (Midway Islands)', value: 'UTC-11' },
+            { label: 'UTC-12 (Baker Island)', value: 'UTC-12' }
+          ]
+        }
+      }
+    }
+  },
   BASIC: {
     id: 'basic',
     title: 'Basic Settings',
@@ -74,7 +132,7 @@ export const SECTIONS: Record<string, SectionConfig> = {
         unit: 'min',
         validation: {
           type: 'integer' as const,
-          min: 0,
+          min: 1,
           max: 1440
         }
       },
