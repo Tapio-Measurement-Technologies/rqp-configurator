@@ -1,152 +1,19 @@
 <script lang="ts">
-  import { defaultConfigs } from './types'
-  import type { ConfigItem, AlertLimitItem, ConfigSection as ConfigSectionType } from './types'
   import ConfigSection from './lib/ConfigSection.svelte'
   import QRDisplay from './lib/QRDisplay.svelte'
-  import { QR_CONFIG, UI_CONFIG } from './config/settings'
+  import { UI_CONFIG, QR_CONFIG } from './config/settings'
   import Footer from './lib/Footer.svelte';
   import Header from './lib/Header.svelte';
-  import { onMount } from 'svelte';
   import WarningIcon from './assets/icons/warning.svg?raw'
-
-  let configSections = defaultConfigs
-  let text = ''
-  let showWarning = false
-  let showAdvanced = false
-  let currentTimestamp = Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 1000)
-
-  function getTimezoneOffset(timezone: string): number {
-    if (timezone === 'local') {
-      return new Date().getTimezoneOffset() * 60000
-    }
-    if (timezone === 'UTC') {
-      return 0
-    }
-    const match = timezone.match(/UTC([+-])(\d+)/)
-    if (match) {
-      const [, sign, hours] = match
-      return (sign === '-' ? 1 : -1) * parseInt(hours) * 3600000
-    }
-    return 0
-  }
-
-  // Update timestamp periodically
-  let timestampInterval: NodeJS.Timeout
-
-  onMount(() => {
-    timestampInterval = setInterval(() => {
-      const dateTimeSection = configSections.find(s => s.id === 'date_time')
-      const timeSyncItem = dateTimeSection?.items.find(item => item.key === 'SETTIME')
-      const timezoneItem = dateTimeSection?.items.find(item => item.key === 'timezone')
-
-      if (timeSyncItem && 'value' in timeSyncItem && timeSyncItem.value === '1') {
-        const timezone = timezoneItem && 'value' in timezoneItem ? timezoneItem.value : 'local'
-        const offset = getTimezoneOffset(timezone)
-        currentTimestamp = Math.floor((Date.now() - offset) / 1000)
-        updateConfigText()
-      }
-    }, UI_CONFIG.TIME_SYNC_UPDATE_INTERVAL)
-
-    return () => {
-      clearInterval(timestampInterval)
-    }
-  })
-
-  function updateConfigText() {
-    const configPairs = configSections
-      .flatMap(section => section.items as (ConfigItem | AlertLimitItem)[])
-      .flatMap((item: ConfigItem | AlertLimitItem) => {
-        if ('value' in item) {
-          if (item.key === 'SETTIME') {
-            return item.value === '1' ? [`${item.key}=${currentTimestamp}`] : []
-          }
-          if (item.key === 'timezone') {
-            return []
-          }
-          return item.value.trim() ? [`${item.key}=${item.value}`] : []
-        }
-        const minKey = `${item.key}_min`
-        const maxKey = `${item.key}_max`
-        return [
-          ...(item.minValue.trim() ? [`${minKey}=${item.minValue}`] : []),
-          ...(item.maxValue.trim() ? [`${maxKey}=${item.maxValue}`] : [])
-        ]
-      })
-
-    const validConfigs = configPairs.slice(0, QR_CONFIG.MAX_CONFIG_VALUES).join(';')
-    text = validConfigs
-    showWarning = configPairs.length > QR_CONFIG.MAX_CONFIG_VALUES
-  }
-
-  function clearAllValues() {
-    configSections = configSections.map(section => {
-      if (section.type === 'alert_limits') {
-        return {
-          ...section,
-          items: section.items.map(item => ({ ...item as AlertLimitItem, minValue: '', maxValue: '' }))
-        }
-      }
-      return {
-        ...section,
-        items: section.items.map(item => ({ ...item as ConfigItem, value: '' }))
-      }
-    })
-  }
-
-  function resetAdvancedValues() {
-    configSections = configSections.map(section => {
-      if (section.type === 'alert_limits') {
-        return {
-          ...section,
-          items: (section.items as AlertLimitItem[]).map(item =>
-            item.advanced ? { ...item, minValue: '', maxValue: '' } : item
-          )
-        }
-      }
-      return {
-        ...section,
-        items: (section.items as ConfigItem[]).map(item =>
-          item.advanced ? { ...item, value: '' } : item
-        )
-      }
-    }) as ConfigSectionType[]
-  }
-
-  $: visibleSections = configSections.map(section => {
-    const filteredItems = section.type === 'alert_limits'
-      ? (section.items as AlertLimitItem[]).filter(item => showAdvanced || !item.advanced)
-      : (section.items as ConfigItem[]).filter(item => showAdvanced || !item.advanced)
-
-    return {
-      ...section,
-      items: filteredItems
-    }
-  }).filter(section => section.items.length > 0)
+  import { configStore, visibleSections, showAdvancedStore } from './stores/configStore'
+  import { qrText } from './stores/qrStore'
 
   $: {
-    if (!showAdvanced) {
-      resetAdvancedValues()
+    if (!$showAdvancedStore) {
+      configStore.resetAdvancedValues()
     } else {
-      visibleSections.forEach(visibleSection => {
-        const originalSection = configSections.find(s => s.id === visibleSection.id)
-        if (originalSection) {
-          visibleSection.items.forEach(item => {
-            const originalItem = originalSection.items.find(i =>
-              'key' in item && 'key' in i && item.key === i.key
-            )
-            if (originalItem) {
-              if ('value' in item && 'value' in originalItem) {
-                originalItem.value = item.value
-              } else if ('minValue' in item && 'minValue' in originalItem) {
-                originalItem.minValue = item.minValue
-                originalItem.maxValue = item.maxValue
-              }
-            }
-          })
-        }
-      })
+      configStore.updateVisibleSectionValues($visibleSections)
     }
-    updateConfigText()
   }
 </script>
 
@@ -159,21 +26,21 @@
         <label class="toggle">
           <input
             type="checkbox"
-            bind:checked={showAdvanced}
+            bind:checked={$showAdvancedStore}
           />
           <span class="slider"></span>
           <span class="label">Show Advanced Settings</span>
         </label>
       </div>
 
-      {#if showAdvanced}
+      {#if $showAdvancedStore}
         <div class="advanced-warning">
           {@html WarningIcon}
           <span>{UI_CONFIG.ADVANCED_WARNING}</span>
         </div>
       {/if}
 
-      {#if showWarning}
+      {#if $qrText.showWarning}
         <div class="warning-message">
           Warning: Only the first {QR_CONFIG.MAX_CONFIG_VALUES} configuration values will be included in the QR code.
         </div>
@@ -183,18 +50,18 @@
         <div class="input-section">
           <div class="section-header">
             <h2>Configuration Values</h2>
-            <button type="button" class="clear-button" on:click={clearAllValues}>
+            <button type="button" class="clear-button" on:click={() => configStore.clearAllValues()}>
               Clear All
             </button>
           </div>
           <div class="config-list">
-            {#each visibleSections as section (section.id)}
+            {#each $visibleSections as section (section.id)}
               <ConfigSection bind:section />
             {/each}
           </div>
         </div>
 
-        <QRDisplay {text} />
+        <QRDisplay text={$qrText.text} />
       </div>
     </div>
   </div>
