@@ -114,7 +114,7 @@
   .config-list {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1rem;
   }
 
   .settings-toggles {
