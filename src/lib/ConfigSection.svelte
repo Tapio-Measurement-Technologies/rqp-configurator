@@ -7,7 +7,7 @@
   import ToggleConfigItem from './ToggleConfigItem.svelte'
 
   export let section: ConfigSection
-  let isExpanded = false
+  let isExpanded = section.defaultExpanded ?? false
 
   function toggleExpand() {
     isExpanded = !isExpanded
