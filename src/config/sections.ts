@@ -215,6 +215,30 @@ export const SECTIONS: Record<string, SectionConfig> = {
           max: 15000
         }
       },
+      MEAS_IN_PROGRESS_CHART_Y_LIMIT: {
+        key: 'MEAS_IN_PROGRESS_CHART_Y_LIMIT',
+        label: 'Live Chart Y-axis Limit',
+        description: 'Maximum value displayed on the live chart during measurement',
+        unit: 'g',
+        advanced: true,
+        validation: {
+          type: 'float' as const,
+          min: 10,
+          max: 1000
+        }
+      },
+      DYNAMIC_SCALING: {
+        key: 'DYNAMIC_SCALING',
+        label: 'Live Chart Dynamic Scaling',
+        description: 'Enable dynamic scaling of the live chart. Automatically adjusts maximum value displayed if y-axis limit is exceeded.',
+        unit: '',
+        advanced: true,
+        validation: {
+          type: 'toggle' as const,
+          offLabel: 'Off',
+          onLabel: 'On'
+        }
+      },
       ADJUSTMENT_A: {
         key: 'ADJUSTMENT_A',
         label: 'Adjustment A',
