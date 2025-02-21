@@ -60,7 +60,7 @@ function createConfigStore() {
         return {
           ...section,
           items: (section.items as ConfigItem[]).map(item =>
-            item.advanced ? { ...item, value: '' } : item
+            item.advanced ? { ...item, value: item.defaultValue ?? '' } : item
           )
         }
       }) as ConfigSection[]
