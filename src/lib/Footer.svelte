@@ -35,17 +35,24 @@
 
 <style>
   .footer {
-    margin-top: auto;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
     background-color: white;
     border-top: 1px solid #e2e8f0;
     width: 100%;
+    z-index: 10;
+    height: 120px; /* Fixed height to match padding */
+    display: flex;
+    align-items: center;
   }
 
   .container {
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;
-    padding: 2rem 1rem;
+    padding: 0 1rem;
   }
 
   .footer-content {
@@ -117,8 +124,12 @@
   }
 
   @media (max-width: 640px) {
+    .footer {
+      height: 180px; /* Increased height for mobile layout */
+    }
+
     .container {
-      padding: 1.5rem 1rem;
+      padding: 0 1rem;
     }
 
     .footer-content {

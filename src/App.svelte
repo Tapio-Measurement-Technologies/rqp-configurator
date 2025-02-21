@@ -17,57 +17,58 @@
   }
 </script>
 
-<main>
-  <div class="container">
-    <Header />
+<div class="app-wrapper">
+  <main>
+    <div class="container">
+      <Header />
 
-    <div class="card">
-      <div class="settings-toggles">
-        <label class="toggle">
-          <input
-            type="checkbox"
-            bind:checked={$showAdvancedStore}
-          />
-          <span class="slider"></span>
-          <span class="label">Show Advanced Settings</span>
-        </label>
-      </div>
-
-      {#if $showAdvancedStore}
-        <div class="advanced-warning">
-          {@html WarningIcon}
-          <span>{UI_CONFIG.ADVANCED_WARNING}</span>
+      <div class="card">
+        <div class="settings-toggles">
+          <label class="toggle">
+            <input
+              type="checkbox"
+              bind:checked={$showAdvancedStore}
+            />
+            <span class="slider"></span>
+            <span class="label">Show Advanced Settings</span>
+          </label>
         </div>
-      {/if}
 
-      {#if $qrText.showWarning}
-        <div class="warning-message">
-          Warning: Only the first {QR_CONFIG.MAX_CONFIG_VALUES} configuration values will be included in the QR code.
-        </div>
-      {/if}
-
-      <div class="content-grid">
-        <div class="input-section">
-          <div class="section-header">
-            <h2>Configuration Values</h2>
-            <button type="button" class="clear-button" on:click={() => configStore.clearAllValues()}>
-              Clear All
-            </button>
+        {#if $showAdvancedStore}
+          <div class="advanced-warning">
+            {@html WarningIcon}
+            <span>{UI_CONFIG.ADVANCED_WARNING}</span>
           </div>
-          <div class="config-list">
-            {#each $visibleSections as section (section.id)}
-              <ConfigSection bind:section />
-            {/each}
-          </div>
-        </div>
+        {/if}
 
-        <QRDisplay text={$qrText.text} />
+        {#if $qrText.showWarning}
+          <div class="warning-message">
+            Warning: Only the first {QR_CONFIG.MAX_CONFIG_VALUES} configuration values will be included in the QR code.
+          </div>
+        {/if}
+
+        <div class="content-grid">
+          <div class="input-section">
+            <div class="section-header">
+              <h2>Configuration Values</h2>
+              <button type="button" class="clear-button" on:click={() => configStore.clearAllValues()}>
+                Clear All
+              </button>
+            </div>
+            <div class="config-list">
+              {#each $visibleSections as section (section.id)}
+                <ConfigSection bind:section />
+              {/each}
+            </div>
+          </div>
+
+          <QRDisplay text={$qrText.text} />
+        </div>
       </div>
     </div>
-  </div>
-
+  </main>
   <Footer />
-</main>
+</div>
 
 <style>
   :global(body) {
@@ -78,10 +79,15 @@
     min-height: 100vh;
   }
 
-  main {
+  .app-wrapper {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+  }
+
+  main {
+    flex: 1 0 auto;
+    padding-bottom: 120px; /* Space for footer */
   }
 
   .container {
@@ -89,7 +95,6 @@
     margin: 0 auto;
     width: 100%;
     padding: 2rem 1rem;
-    flex: 1;
   }
 
   .card {
