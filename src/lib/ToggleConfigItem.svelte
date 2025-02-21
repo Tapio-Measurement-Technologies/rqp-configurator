@@ -5,11 +5,25 @@
   export let item: ConfigItem
 
   function handleToggle() {
-    item.value = item.value === '1' ? '0' : '1'
+    if (validation.tristate) {
+      // Cycle through states: not set -> on -> off -> not set
+      if (!item.value) {
+        item.value = '1'
+      } else if (item.value === '1') {
+        item.value = '0'
+      } else {
+        item.value = ''
+      }
+    } else {
+      // Traditional toggle behavior
+      item.value = item.value === '1' ? '0' : '1'
+    }
   }
 
   $: isChecked = item.value === '1'
-  $: validation = item.validation as { type: 'toggle'; offLabel?: string; onLabel?: string }
+  $: isOff = item.value === '0'
+  $: isNotSet = !item.value && validation.tristate
+  $: validation = item.validation as { type: 'toggle'; offLabel?: string; onLabel?: string; notSetLabel?: string; tristate?: boolean }
 </script>
 
 <div class="config-item">
@@ -30,9 +44,18 @@
         checked={isChecked}
         on:change={handleToggle}
       />
-      <span class="slider"></span>
+      <span
+        class="slider"
+        class:checked={isChecked}
+        class:not-set={isNotSet}
+        class:off={isOff}
+      ></span>
       <span class="toggle-label">
-        {isChecked ? (validation.onLabel || 'On') : (validation.offLabel || 'Off')}
+        {#if isNotSet}
+          {validation.notSetLabel || 'Not set'}
+        {:else}
+          {isChecked ? (validation.onLabel || 'On') : (validation.offLabel || 'Off')}
+        {/if}
       </span>
     </label>
   </div>
@@ -122,12 +145,29 @@
     transition: all 0.2s ease;
   }
 
-  input:checked + .slider {
+  .slider.checked {
     background-color: #3b82f6;
   }
 
-  input:checked + .slider:before {
+  .slider.checked:before {
     transform: translateX(24px);
+  }
+
+  .slider.not-set {
+    background-color: #94a3b8;
+  }
+
+  .slider.not-set:before {
+    transform: translateX(12px);
+    background-color: #f1f5f9;
+  }
+
+  .slider.off {
+    background-color: #e2e8f0;
+  }
+
+  .slider.off:before {
+    transform: translateX(0);
   }
 
   .toggle-label {

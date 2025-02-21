@@ -25,6 +25,8 @@ export interface ToggleValidation {
   type: 'toggle';
   offLabel?: string;
   onLabel?: string;
+  notSetLabel?: string;
+  tristate?: boolean;
 }
 
 export interface ConfigItem extends BaseConfigItem {

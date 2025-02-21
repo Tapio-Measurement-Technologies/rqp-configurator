@@ -28,7 +28,11 @@ export const qrText = derived<typeof configStore, { text: string; showWarning: b
             if (item.key === 'timezone') {
               return []
             }
-            return item.value.trim() ? [`${item.key}=${item.value}`] : []
+            // Skip empty values and tristate toggle's empty state
+            if (!item.value.trim() || (item.validation.type === 'toggle' && item.validation.tristate && !item.value)) {
+              return []
+            }
+            return [`${item.key}=${item.value}`]
           }
           const minKey = `${item.key}_min`
           const maxKey = `${item.key}_max`

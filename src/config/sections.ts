@@ -109,7 +109,8 @@ export const SECTIONS: Record<string, SectionConfig> = {
         validation: {
           type: 'toggle' as const,
           offLabel: 'Keep',
-          onLabel: 'Remove'
+          onLabel: 'Remove',
+          tristate: true
         }
       }
     }
@@ -236,7 +237,8 @@ export const SECTIONS: Record<string, SectionConfig> = {
         validation: {
           type: 'toggle' as const,
           offLabel: 'Off',
-          onLabel: 'On'
+          onLabel: 'On',
+          tristate: true
         }
       },
       ADJUSTMENT_A: {
