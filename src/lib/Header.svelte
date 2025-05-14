@@ -1,6 +1,7 @@
 <header>
   <h1>RQP Live Configurator</h1>
   <p class="subtitle">Generate configuration QR codes for the Tapio RQP Live Roll Quality Profiler</p>
+  <p class="subtitle">Scan QR with RQP Live to activate device settings</p>
 </header>
 
 <style>
