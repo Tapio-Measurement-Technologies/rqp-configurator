@@ -12,6 +12,7 @@
 
     // Allow only numbers, decimal point, and backspace
     if (!/^-?\d*\.?\d*$/.test(value)) {
+      error = 'Invalid characters in number'
       return false
     }
 
@@ -87,6 +88,7 @@
       on:input={handleInput}
       placeholder={formatPlaceholder()}
       aria-label={`Value for ${item.label}`}
+      class:error={error}
     />
     <span class="unit">{item.unit || '\u00A0'}</span>
   </div>
@@ -172,6 +174,16 @@
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+
+  input[type="text"].error {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+  }
+
+  input[type="text"].error:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
   }
 
   .unit {
