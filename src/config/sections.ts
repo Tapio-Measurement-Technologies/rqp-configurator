@@ -277,6 +277,16 @@ export const SECTIONS: Record<string, SectionConfig> = {
           max: 1000
         }
       },
+      GFILTER_STD: {
+        key: 'GFILTER_STD',
+        label: 'Gaussian Filter Standard Deviation',
+        description: 'Standard deviation for the gaussian filter',
+        unit: '',
+        advanced: true,
+        validation: {
+          type: 'float' as const,
+        }
+      },
       INTERP_STEP_MM: {
         key: 'INTERP_STEP_MM',
         label: 'Interpolation Step',
