@@ -216,6 +216,33 @@ export const SECTIONS: Record<string, SectionConfig> = {
           max: 15000
         }
       },
+      PERSISTENT_PULSE_LEN_ENABLED: {
+        key: 'PERSISTENT_PULSE_LEN_ENABLED',
+        label: 'Enable Persistent Pulse Length',
+        description: 'Adjusts pulse length automatically based on previous measurements. Solenoid pulse length will be ignored when this is enabled.',
+        unit: '',
+        advanced: true,
+        validation: {
+          type: 'toggle' as const,
+          offLabel: 'Off',
+          onLabel: 'On',
+          tristate: true
+        }
+      },
+      // No point in configuring this, it will be updated when measuring profiles
+
+      // PERSISTENT_PULSE_LEN_US: {
+      //   key: 'PERSISTENT_PULSE_LEN_US',
+      //   label: 'Default Persistent Pulse Length',
+      //   description: 'Pulse length for persistent pulse length feature (only an initial value, will be updated when measuring profiles)',
+      //   unit: 'µs',
+      //   advanced: true,
+      //   validation: {
+      //     type: 'float' as const,
+      //     min: 0,
+      //     max: 15000
+      //   }
+      // },
       MEAS_IN_PROGRESS_CHART_Y_LIMIT: {
         key: 'MEAS_IN_PROGRESS_CHART_Y_LIMIT',
         label: 'Live Chart Y-axis Limit',
@@ -311,16 +338,28 @@ export const SECTIONS: Record<string, SectionConfig> = {
           max: 10
         }
       },
-      ACCELEROMETER_RANGE_PM: {
-        key: 'ACCELEROMETER_RANGE_PM',
-        label: 'Accelerometer Range',
-        description: 'Range of the accelerometer',
+      ADC_ACCEL_0G: {
+        key: 'ADC_ACCEL_0G',
+        label: 'Accelerometer sensor value at 0g',
+        description: 'Sensor value at 0g (used for calibration)',
         unit: '',
         advanced: true,
         validation: {
           type: 'float' as const,
-          min: -1000,
-          max: 1000
+          min: 0,
+          max: 4095
+        }
+      },
+      ADC_ACCEL_STEP: {
+        key: 'ADC_ACCEL_STEP',
+        label: 'Accelerometer sensor value step',
+        description: 'Step size for accelerometer sensor value (steps per g)',
+        unit: '1/g',
+        advanced: true,
+        validation: {
+          type: 'float' as const,
+          min: 0,
+          max: 20
         }
       },
       PID_MODE: {
