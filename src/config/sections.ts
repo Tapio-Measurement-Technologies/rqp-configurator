@@ -268,6 +268,19 @@ export const SECTIONS: Record<string, SectionConfig> = {
           tristate: true
         }
       },
+      ENABLE_GAVG: {
+        key: 'ENABLE_GAVG',
+        label: 'Enable Gaussian Averaging',
+        description: 'Enable gaussian averaging for measurement files',
+        unit: '',
+        advanced: true,
+        validation: {
+          type: 'toggle' as const,
+          offLabel: 'Off',
+          onLabel: 'On',
+          tristate: true
+        }
+      },
       ADJUSTMENT_A: {
         key: 'ADJUSTMENT_A',
         label: 'Adjustment A',
