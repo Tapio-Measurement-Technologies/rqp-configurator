@@ -281,6 +281,21 @@ export const SECTIONS: Record<string, SectionConfig> = {
           tristate: true
         }
       },
+      HAMMER_FORCE_MODE: {
+        key: 'HAMMER_FORCE_MODE',
+        label: 'Hammer Force Mode',
+        description: 'Adjusts hammer force in profile measurement',
+        unit: '',
+        advanced: true,
+        validation: {
+          type: 'select' as const,
+          options: [
+            { label: 'Standard', value: 0 },
+            { label: 'Low', value: 1 },
+            { label: 'High', value: 2 }
+          ]
+        }
+      },
       ADJUSTMENT_A: {
         key: 'ADJUSTMENT_A',
         label: 'Adjustment A',
