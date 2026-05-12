@@ -1,12 +1,16 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import type { SelectConfigItem } from '../types'
   import { UI_CONFIG } from '../config/settings'
 
   export let item: SelectConfigItem
+  const dispatch = createEventDispatcher<{
+    valueChange: { key: string; value: string }
+  }>()
 
   function handleSelect(event: Event) {
     const select = event.target as HTMLSelectElement
-    item.value = select.value
+    dispatch('valueChange', { key: item.key, value: select.value })
   }
 
   $: selectedOption = item.validation.options.find(opt => opt.value.toString() === item.value)

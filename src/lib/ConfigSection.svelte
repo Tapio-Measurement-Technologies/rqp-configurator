@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import type { ConfigSection, AlertLimitItem as AlertLimitItemType, ConfigItem as ConfigItemType, SelectConfigItem as SelectConfigItemType } from '../types'
   import { slide } from 'svelte/transition'
   import ConfigItem from './ConfigItem.svelte'
@@ -8,7 +9,12 @@
   import ArrowIcon from '../assets/icons/arrow.svg?raw'
 
   export let section: ConfigSection
+  export let showAdvanced = false
   let isExpanded = section.defaultExpanded ?? false
+  const dispatch = createEventDispatcher<{
+    configValueChange: { sectionId: string; key: string; value: string }
+    alertLimitValuesChange: { sectionId: string; key: string; minValue: string; maxValue: string }
+  }>()
 
   function toggleExpand() {
     isExpanded = !isExpanded
@@ -26,9 +32,21 @@
     return 'minValue' in item && 'maxValue' in item
   }
 
-  $: {
-    console.log('Section items changed:', section.items)
+  function handleConfigValueChange(event: CustomEvent<{ key: string; value: string }>) {
+    dispatch('configValueChange', {
+      sectionId: section.id,
+      ...event.detail
+    })
   }
+
+  function handleAlertLimitValuesChange(event: CustomEvent<{ key: string; minValue: string; maxValue: string }>) {
+    dispatch('alertLimitValuesChange', {
+      sectionId: section.id,
+      ...event.detail
+    })
+  }
+
+  $: visibleItems = section.items.filter(item => showAdvanced || !item.advanced)
 </script>
 
 <div class="config-section">
@@ -53,17 +71,17 @@
       transition:slide={{ duration: 200 }}
     >
       {#if section.type === 'alert_limits'}
-        {#each section.items as item}
-          <AlertLimitItem bind:item={item as AlertLimitItemType} />
+        {#each visibleItems as item (item.key)}
+          <AlertLimitItem item={item as AlertLimitItemType} on:valuesChange={handleAlertLimitValuesChange} />
         {/each}
       {:else}
-        {#each section.items as item}
+        {#each visibleItems as item (item.key)}
           {#if isSelectItem(item)}
-            <SelectConfigItem bind:item={item as SelectConfigItemType} />
+            <SelectConfigItem item={item as SelectConfigItemType} on:valueChange={handleConfigValueChange} />
           {:else if isToggleItem(item)}
-            <ToggleConfigItem bind:item={item as ConfigItemType} />
+            <ToggleConfigItem item={item as ConfigItemType} on:valueChange={handleConfigValueChange} />
           {:else if !isAlertLimitItem(item)}
-            <ConfigItem bind:item={item as ConfigItemType} />
+            <ConfigItem item={item as ConfigItemType} on:valueChange={handleConfigValueChange} />
           {/if}
         {/each}
       {/if}

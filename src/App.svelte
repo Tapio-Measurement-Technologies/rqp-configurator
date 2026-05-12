@@ -9,6 +9,9 @@
   import { qrText } from './stores/qrStore'
   import { FIRMWARE_VERSION_OPTIONS, isFirmwareVersion } from './config/firmwareVersions'
 
+  type ConfigValueChange = CustomEvent<{ sectionId: string; key: string; value: string }>
+  type AlertLimitValuesChange = CustomEvent<{ sectionId: string; key: string; minValue: string; maxValue: string }>
+
   function handleFirmwareVersionChange(event: Event) {
     const select = event.target as HTMLSelectElement
     if (!isFirmwareVersion(select.value)) return
@@ -18,11 +21,19 @@
     configStore.setFirmwareVersion(version)
   }
 
+  function handleConfigValueChange(event: ConfigValueChange) {
+    const { sectionId, key, value } = event.detail
+    configStore.updateConfigValue(sectionId, key, value)
+  }
+
+  function handleAlertLimitValuesChange(event: AlertLimitValuesChange) {
+    const { sectionId, key, minValue, maxValue } = event.detail
+    configStore.updateAlertLimitValues(sectionId, key, minValue, maxValue)
+  }
+
   $: {
     if (!$showAdvancedStore) {
       configStore.resetAdvancedValues()
-    } else {
-      configStore.updateVisibleSectionValues($visibleSections)
     }
   }
 </script>
@@ -87,7 +98,12 @@
               </div>
 
               {#each $visibleSections as section (section.id)}
-                <ConfigSection bind:section />
+                <ConfigSection
+                  {section}
+                  showAdvanced={$showAdvancedStore}
+                  on:configValueChange={handleConfigValueChange}
+                  on:alertLimitValuesChange={handleAlertLimitValuesChange}
+                />
               {/each}
             </div>
           </div>

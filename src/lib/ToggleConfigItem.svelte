@@ -1,23 +1,31 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import type { ConfigItem } from '../types'
   import { UI_CONFIG } from '../config/settings'
 
   export let item: ConfigItem
+  const dispatch = createEventDispatcher<{
+    valueChange: { key: string; value: string }
+  }>()
 
   function handleToggle() {
+    let value: string
+
     if (validation.tristate) {
       // Cycle through states: not set -> on -> off -> not set
       if (!item.value) {
-        item.value = '1'
+        value = '1'
       } else if (item.value === '1') {
-        item.value = '0'
+        value = '0'
       } else {
-        item.value = ''
+        value = ''
       }
     } else {
       // Traditional toggle behavior
-      item.value = item.value === '1' ? '0' : '1'
+      value = item.value === '1' ? '0' : '1'
     }
+
+    dispatch('valueChange', { key: item.key, value })
   }
 
   $: isChecked = item.value === '1'

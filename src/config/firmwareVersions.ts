@@ -1,4 +1,5 @@
 export const FIRMWARE_VERSION_OPTIONS = [
+  { label: 'v1.1.4', value: 'v1.1.4' },
   { label: 'v1.1.3', value: 'v1.1.3' },
   { label: 'v1.1.2', value: 'v1.1.2' },
   { label: 'v1.1.1', value: 'v1.1.1' },

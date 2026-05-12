@@ -1,8 +1,12 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import type { AlertLimitItem } from '../types'
   import { UI_CONFIG } from '../config/settings'
 
   export let item: AlertLimitItem
+  const dispatch = createEventDispatcher<{
+    valuesChange: { key: string; minValue: string; maxValue: string }
+  }>()
   let minError = ''
   let maxError = ''
   let rememberedMinValue = ''
@@ -66,11 +70,11 @@
     const input = event.target as HTMLInputElement
     const isValid = validateInput(input.value, isMin)
     if (isValid) {
-      if (isMin) {
-        item.minValue = input.value
-      } else {
-        item.maxValue = input.value
-      }
+      dispatch('valuesChange', {
+        key: item.key,
+        minValue: isMin ? input.value : item.minValue,
+        maxValue: isMin ? item.maxValue : input.value
+      })
     }
   }
 
@@ -84,17 +88,33 @@
   function toggleValue(isMin: boolean) {
     if (isMin) {
       if (item.minValue === 'NaN') {
-        item.minValue = rememberedMinValue || ''
+        dispatch('valuesChange', {
+          key: item.key,
+          minValue: rememberedMinValue || '',
+          maxValue: item.maxValue
+        })
       } else {
         rememberedMinValue = item.minValue
-        item.minValue = 'NaN'
+        dispatch('valuesChange', {
+          key: item.key,
+          minValue: 'NaN',
+          maxValue: item.maxValue
+        })
       }
     } else {
       if (item.maxValue === 'NaN') {
-        item.maxValue = rememberedMaxValue || ''
+        dispatch('valuesChange', {
+          key: item.key,
+          minValue: item.minValue,
+          maxValue: rememberedMaxValue || ''
+        })
       } else {
         rememberedMaxValue = item.maxValue
-        item.maxValue = 'NaN'
+        dispatch('valuesChange', {
+          key: item.key,
+          minValue: item.minValue,
+          maxValue: 'NaN'
+        })
       }
     }
   }

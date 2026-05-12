@@ -103,7 +103,7 @@ export const BASE_SECTIONS: Record<string, SectionConfig> = {
       },
       REMOVE_FILES_AFTER_SYNC: {
         key: 'remove_files_after_sync',
-        label: 'Auto Clean Files',
+        label: 'Auto Clean Profiles',
         description: 'Automatically remove measurement files after successful sync',
         unit: '',
         validation: {
@@ -268,6 +268,19 @@ export const BASE_SECTIONS: Record<string, SectionConfig> = {
           tristate: true
         }
       },
+      START_Y_AXIS_AT_ZERO: {
+        key: 'START_Y_AXIS_AT_ZERO',
+        label: 'Start Y-axis at Zero',
+        description: 'Start measurement chart y-axis at y=0',
+        unit: '',
+        advanced: true,
+        validation: {
+          type: 'toggle' as const,
+          offLabel: 'Off',
+          onLabel: 'On',
+          tristate: true
+        }
+      },
       ENABLE_GAVG: {
         key: 'ENABLE_GAVG',
         label: 'Enable Gaussian Averaging',
@@ -402,6 +415,19 @@ export const BASE_SECTIONS: Record<string, SectionConfig> = {
             { label: 'Off', value: 0 },
             { label: 'Continuous', value: 1 }
           ]
+        }
+      },
+      ENABLE_BT: {
+        key: 'ENABLE_BT',
+        label: 'Enable Bluetooth',
+        description: 'Enable Bluetooth communication',
+        unit: '',
+        advanced: true,
+        validation: {
+          type: 'toggle' as const,
+          offLabel: 'Off',
+          onLabel: 'On',
+          tristate: true
         }
       }
     }

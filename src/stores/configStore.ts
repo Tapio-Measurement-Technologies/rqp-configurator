@@ -77,27 +77,36 @@ function createConfigStore() {
         }
       }) as ConfigSection[]
     ),
-    updateVisibleSectionValues: (visibleSections: ConfigSection[]) => update((sections: ConfigSection[]) => {
-      visibleSections.forEach(visibleSection => {
-        const originalSection = sections.find((s: ConfigSection) => s.id === visibleSection.id)
-        if (originalSection) {
-          visibleSection.items.forEach(item => {
-            const originalItem = originalSection.items.find((i: ConfigItem | AlertLimitItem) =>
-              'key' in item && 'key' in i && item.key === i.key
-            )
-            if (originalItem) {
-              if ('value' in item && 'value' in originalItem) {
-                originalItem.value = item.value
-              } else if ('minValue' in item && 'minValue' in originalItem) {
-                originalItem.minValue = item.minValue
-                originalItem.maxValue = item.maxValue
-              }
-            }
-          })
+    updateConfigValue: (sectionId: string, key: string, value: string) => update((sections: ConfigSection[]) =>
+      sections.map(section => {
+        if (section.id !== sectionId) return section
+        if (section.type === 'alert_limits') return section
+
+        return {
+          ...section,
+          items: (section.items as ConfigItem[]).map(item =>
+            item.key === key && 'value' in item
+              ? { ...item, value }
+              : item
+          )
         }
       })
-      return sections
-    }),
+    ),
+    updateAlertLimitValues: (sectionId: string, key: string, minValue: string, maxValue: string) => update((sections: ConfigSection[]) =>
+      sections.map(section => {
+        if (section.id !== sectionId) return section
+        if (section.type !== 'alert_limits') return section
+
+        return {
+          ...section,
+          items: (section.items as AlertLimitItem[]).map(item =>
+            item.key === key && 'minValue' in item
+              ? { ...item, minValue, maxValue }
+              : item
+          )
+        }
+      })
+    ),
     setFirmwareVersion: (version: FirmwareVersion) => update((sections: ConfigSection[]) => {
       currentFirmwareVersion = version
       const nextSections = groupItemsBySection(version)
@@ -167,15 +176,8 @@ showAdvancedStore.subscribe(value => {
 export const visibleSections = derived(
   [configStore, showAdvancedStore],
   ([$configStore, $showAdvanced]) => {
-    return $configStore.map(section => {
-      const filteredItems = section.type === 'alert_limits'
-        ? (section.items as AlertLimitItem[]).filter(item => $showAdvanced || !item.advanced)
-        : (section.items as ConfigItem[]).filter(item => $showAdvanced || !item.advanced)
-
-      return {
-        ...section,
-        items: filteredItems
-      }
-    }).filter(section => section.items.length > 0)
+    return $configStore.filter(section =>
+      $showAdvanced || section.items.some(item => !item.advanced)
+    )
   }
 )

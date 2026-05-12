@@ -1,8 +1,12 @@
 <script lang="ts">
+  import { createEventDispatcher } from 'svelte'
   import type { ConfigItem, ConfigValidation, SelectValidation } from '../types'
   import { UI_CONFIG } from '../config/settings'
 
   export let item: ConfigItem
+  const dispatch = createEventDispatcher<{
+    valueChange: { key: string; value: string }
+  }>()
 
   function validateInput(value: string): boolean {
     if (!value.trim()) {
@@ -56,7 +60,7 @@
     const input = event.target as HTMLInputElement
     const isValid = validateInput(input.value)
     if (isValid) {
-      item.value = input.value
+      dispatch('valueChange', { key: item.key, value: input.value })
     }
   }
 
