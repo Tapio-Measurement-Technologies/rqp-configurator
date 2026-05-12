@@ -1,9 +1,20 @@
 import { writable, derived } from 'svelte/store'
 import type { ConfigItem, AlertLimitItem, ConfigSection } from '../types'
-import { defaultConfigs } from '../utils/configUtils'
+import { defaultConfigs, groupItemsBySection } from '../utils/configUtils'
 import { UI_CONFIG } from '../config/settings'
+import { DEFAULT_FIRMWARE_VERSION, isFirmwareVersion, type FirmwareVersion } from '../config/firmwareVersions'
 
 const STORAGE_KEY = 'rqp-configurator-state'
+const FIRMWARE_VERSION_STORAGE_KEY = 'rqp-configurator-firmware-version'
+
+const loadFirmwareVersion = (): FirmwareVersion => {
+  if (typeof window === 'undefined' || !UI_CONFIG.PERSIST_STATE) return DEFAULT_FIRMWARE_VERSION
+
+  const savedVersion = window.localStorage.getItem(FIRMWARE_VERSION_STORAGE_KEY)
+  return isFirmwareVersion(savedVersion)
+    ? savedVersion
+    : DEFAULT_FIRMWARE_VERSION
+}
 
 // Load initial state from localStorage or use default
 const loadInitialState = () => {
@@ -23,6 +34,7 @@ const loadInitialState = () => {
 
 function createConfigStore() {
   const { subscribe, set, update } = writable<ConfigSection[]>(loadInitialState())
+  let currentFirmwareVersion: FirmwareVersion = loadFirmwareVersion()
 
   // Save to localStorage whenever the store changes
   subscribe(state => {
@@ -86,16 +98,55 @@ function createConfigStore() {
       })
       return sections
     }),
+    setFirmwareVersion: (version: FirmwareVersion) => update((sections: ConfigSection[]) => {
+      currentFirmwareVersion = version
+      const nextSections = groupItemsBySection(version)
+
+      return nextSections.map(section => {
+        const existingSection = sections.find((existing: ConfigSection) => existing.id === section.id)
+        if (!existingSection) return section
+
+        return {
+          ...section,
+          items: section.items.map(item => {
+            const existingItem = existingSection.items.find((existing: ConfigItem | AlertLimitItem) =>
+              'key' in item && 'key' in existing && item.key === existing.key
+            )
+
+            if (!existingItem) return item
+            if ('value' in item && 'value' in existingItem) {
+              return { ...item, value: existingItem.value }
+            }
+            if ('minValue' in item && 'minValue' in existingItem) {
+              return {
+                ...item,
+                minValue: existingItem.minValue,
+                maxValue: existingItem.maxValue
+              }
+            }
+            return item
+          })
+        }
+      }) as ConfigSection[]
+    }),
     resetToDefault: () => {
       if (typeof window !== 'undefined' && UI_CONFIG.PERSIST_STATE) {
         window.localStorage.removeItem(STORAGE_KEY)
       }
-      set(defaultConfigs)
+      set(groupItemsBySection(currentFirmwareVersion))
     }
   }
 }
 
 export const configStore = createConfigStore()
+
+export const selectedFirmwareVersionStore = writable<FirmwareVersion>(loadFirmwareVersion())
+
+selectedFirmwareVersionStore.subscribe(version => {
+  if (typeof window !== 'undefined' && UI_CONFIG.PERSIST_STATE) {
+    window.localStorage.setItem(FIRMWARE_VERSION_STORAGE_KEY, version)
+  }
+})
 
 // Create a store for the showAdvanced state with localStorage persistence
 const loadShowAdvanced = () => {

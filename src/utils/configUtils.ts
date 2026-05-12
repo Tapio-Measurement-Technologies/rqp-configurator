@@ -1,5 +1,6 @@
 import type { BaseConfigItem, ConfigSection } from '../types'
-import { SECTIONS } from '../config/sections'
+import { SECTIONS_BY_VERSION } from '../config/sections'
+import { DEFAULT_FIRMWARE_VERSION, type FirmwareVersion } from '../config/firmwareVersions'
 
 export function createConfigItems(items: Record<string, BaseConfigItem>) {
   return Object.values(items).map(item => ({
@@ -16,8 +17,8 @@ export function createAlertItems(items: Record<string, BaseConfigItem>) {
   }))
 }
 
-export function groupItemsBySection(): ConfigSection[] {
-  return Object.entries(SECTIONS).map(([_, section]) => ({
+export function groupItemsBySection(version: FirmwareVersion = DEFAULT_FIRMWARE_VERSION): ConfigSection[] {
+  return Object.entries(SECTIONS_BY_VERSION[version]).map(([_, section]) => ({
     id: section.id,
     title: section.title,
     type: section.type,

@@ -5,8 +5,18 @@
   import Footer from './lib/Footer.svelte';
   import Header from './lib/Header.svelte';
   import WarningIcon from './assets/icons/warning.svg?raw'
-  import { configStore, visibleSections, showAdvancedStore } from './stores/configStore'
+  import { configStore, visibleSections, showAdvancedStore, selectedFirmwareVersionStore } from './stores/configStore'
   import { qrText } from './stores/qrStore'
+  import { FIRMWARE_VERSION_OPTIONS, isFirmwareVersion } from './config/firmwareVersions'
+
+  function handleFirmwareVersionChange(event: Event) {
+    const select = event.target as HTMLSelectElement
+    if (!isFirmwareVersion(select.value)) return
+
+    const version = select.value
+    selectedFirmwareVersionStore.set(version)
+    configStore.setFirmwareVersion(version)
+  }
 
   $: {
     if (!$showAdvancedStore) {
@@ -56,6 +66,26 @@
               </button>
             </div>
             <div class="config-list">
+              <div class="version-selector">
+                <div class="version-info">
+                  <label for="firmware-version">Firmware Version</label>
+                  <span class="version-description">
+                    Firmware version can be found on "About device" page. For versions other than listed here, select "Other versions".
+                  </span>
+                </div>
+                <div class="version-input">
+                  <select
+                    id="firmware-version"
+                    value={$selectedFirmwareVersionStore}
+                    on:change={handleFirmwareVersionChange}
+                  >
+                    {#each FIRMWARE_VERSION_OPTIONS as option}
+                      <option value={option.value}>{option.label}</option>
+                    {/each}
+                  </select>
+                </div>
+              </div>
+
               {#each $visibleSections as section (section.id)}
                 <ConfigSection bind:section />
               {/each}
@@ -120,6 +150,62 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .version-selector {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 0.75rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+
+  .version-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .version-selector label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .version-description {
+    font-size: 0.85rem;
+    color: #64748b;
+    line-height: 1.3;
+  }
+
+  .version-input {
+    display: flex;
+    align-items: center;
+  }
+
+  .version-selector select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background-color: white;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .version-selector select:hover {
+    border-color: #cbd5e1;
+  }
+
+  .version-selector select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
   }
 
   .settings-toggles {
@@ -243,6 +329,11 @@
     .content-grid {
       grid-template-columns: 1fr;
       gap: 2rem;
+    }
+
+    .version-selector {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
     }
 
     .input-section {
