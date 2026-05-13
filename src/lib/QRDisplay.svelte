@@ -12,28 +12,43 @@
   let errorMessage = ''
   let copyMessage = ''
   let copyTimeout: ReturnType<typeof setTimeout> | undefined
+  let freeEditEnabled = false
+  let editableText = ''
 
   function getQRContent(input: string): string {
     return `${QR_CONFIG.SOH_CHARACTER}${QR_CONFIG.CONFIG_PREFIX}${input}`
   }
 
+  function escapeRawData(input: string): string {
+    return input.split('').map(char =>
+      char === QR_CONFIG.SOH_CHARACTER ? '\\x01' : char
+    ).join('')
+  }
+
+  function parseRawDataInput(input: string): string {
+    return input.replace(/\\x01/g, QR_CONFIG.SOH_CHARACTER)
+  }
+
+  $: lockedQRContent = getQRContent(text)
+  $: editableQRContent = parseRawDataInput(editableText)
+  $: qrContent = freeEditEnabled
+    ? editableQRContent
+    : (text.trim() ? lockedQRContent : '')
+
   function generateQR() {
     errorMessage = ''
-    if (!text || !text.trim()) {
+    if (!qrContent || !qrContent.trim()) {
+      if (qrCanvas) {
+        const context = qrCanvas.getContext('2d')
+        context?.clearRect(0, 0, qrCanvas.width, qrCanvas.height)
+      }
       return
     }
-    const qrContent = getQRContent(text)
+
+    if (!qrCanvas) return
     QRCode.toCanvas(qrCanvas, qrContent, QR_CONFIG.QR_OPTIONS).catch((err: Error) => {
       errorMessage = 'Error generating QR code: ' + err.message
     })
-  }
-
-  function formatContentWithHex(input: string): string {
-    const qrContent = getQRContent(input)
-    return qrContent.split('').map((char, i) => {
-      if (i === 0) return '\\x01' // SOH character
-      return char
-    }).join('')
   }
 
   async function copyToClipboard() {
@@ -69,10 +84,17 @@
   }
 
   function isQREmpty(): boolean {
-    return !text || !text.trim();
+    return !qrContent || !qrContent.trim();
   }
 
-  $: if (text !== undefined) {
+  function toggleFreeEdit() {
+    freeEditEnabled = !freeEditEnabled
+    if (freeEditEnabled) {
+      editableText = escapeRawData(lockedQRContent)
+    }
+  }
+
+  $: if (qrContent !== undefined) {
     generateQR()
   }
 
@@ -83,13 +105,13 @@
 
 <div class="qr-section">
   <div class="qr-container">
-    {#if !text}
+    {#if !qrContent}
       <div class="placeholder">
         {@html QRPlaceholderIcon}
         <span>Enter configuration values to generate QR code</span>
       </div>
     {/if}
-    <canvas bind:this={qrCanvas} class:hidden={!text}></canvas>
+    <canvas bind:this={qrCanvas} class:hidden={!qrContent}></canvas>
   </div>
   <div class="button-group">
     <button
@@ -119,12 +141,42 @@
       </span>
     </button>
   </div>
-  {#if text}
+  {#if qrContent || import.meta.env.DEV}
     <div class="content-section">
       <div class="content-header">
         <p class="qr-text">Raw data:</p>
+        {#if import.meta.env.DEV}
+          <button
+            type="button"
+            class="free-edit-button"
+            class:active={freeEditEnabled}
+            on:click={toggleFreeEdit}
+            title={freeEditEnabled ? 'Use configuration values' : 'Edit raw QR data directly'}
+          >
+            Free edit
+          </button>
+        {/if}
       </div>
-      <pre class="code-block">{formatContentWithHex(text)}</pre>
+      {#if import.meta.env.DEV}
+        {#if !freeEditEnabled}
+          <textarea
+            class="code-block code-input"
+            value={escapeRawData(lockedQRContent)}
+            aria-label="Raw QR data"
+            spellcheck="false"
+            readonly
+          ></textarea>
+        {:else}
+          <textarea
+            class="code-block code-input"
+            bind:value={editableText}
+            aria-label="Editable raw QR data"
+            spellcheck="false"
+          ></textarea>
+        {/if}
+      {:else}
+        <pre class="code-block">{escapeRawData(qrContent)}</pre>
+      {/if}
     </div>
   {/if}
   {#if errorMessage}
@@ -194,6 +246,25 @@
     word-break: break-all;
   }
 
+  .code-input {
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    min-height: 8rem;
+    resize: vertical;
+  }
+
+  .code-input[readonly] {
+    color: #4b5563;
+    cursor: default;
+  }
+
+  .code-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+
   .error {
     color: #dc2626;
     margin: 1rem 0;
@@ -212,6 +283,28 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
+  }
+
+  .free-edit-button {
+    padding: 0.4rem 0.65rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: white;
+    color: #1a1a1a;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .free-edit-button:hover {
+    border-color: #3b82f6;
+    background-color: #f8fafc;
+  }
+
+  .free-edit-button.active {
+    border-color: #f97316;
+    background-color: #fff7ed;
+    color: #9a3412;
   }
 
   .button-group {
