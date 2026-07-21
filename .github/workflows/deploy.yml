@@ -23,7 +23,7 @@ jobs:
           persist-credentials: false
 
       - name: Validate dependencies and generate source evidence
-        uses: Tapio-Measurement-Technologies/tapio-build-tooling/actions/node-supply-chain@9870c865a479c18ff9dc78f688e92c5b0d83624f
+        uses: Tapio-Measurement-Technologies/tapio-build-tooling/actions/node-supply-chain@d8b734f32080d7251af36513c066733004a49bde
         with:
           config: build-tooling.toml
           product: rqp-configurator
